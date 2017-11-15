@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>maven-parent-pom</artifactId>
+        <groupId>org.exoplatform</groupId>
+        <version>17-M01</version>
+        <relativePath />
+    </parent>
+    <groupId>org.exoplatform.injector</groupId>
+    <artifactId>data-injection-lib</artifactId>
+    <packaging>jar</packaging>
+    <version>1.0.x-SNAPSHOT</version>
+    <name>Data Injection - Service</name>
+    <properties>
+        <task.addon.version>1.3.x-SNAPSHOT</task.addon.version>
+        <answers.addon.version>1.3.x-SNAPSHOT</answers.addon.version>
+        <itext.version>2.1.7</itext.version>
+        <platform.version>5.0.x-SNAPSHOT</platform.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.exoplatform.platform</groupId>
+            <artifactId>platform</artifactId>
+            <version>${platform.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.exoplatform.forum</groupId>
+            <artifactId>forum-forum-service</artifactId>
+            <version>${platform.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.exoplatform.calendar</groupId>
+            <artifactId>calendar-service</artifactId>
+            <version>${platform.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.exoplatform.wiki</groupId>
+            <artifactId>wiki-service</artifactId>
+            <version>${platform.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.exoplatform.addons.task</groupId>
+            <artifactId>task-management-services</artifactId>
+            <version>${task.addon.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.exoplatform.addons.answers</groupId>
+            <artifactId>answers-services</artifactId>
+            <version>${answers.addon.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+</project>
