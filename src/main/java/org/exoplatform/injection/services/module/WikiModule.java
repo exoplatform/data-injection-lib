@@ -1,7 +1,6 @@
 package org.exoplatform.injection.services.module;
 
 
-import org.exoplatform.injection.services.AbstractInjector;
 import org.exoplatform.injection.services.helper.InjectorUtils;
 import org.exoplatform.portal.config.model.PortalConfig;
 import org.exoplatform.services.log.ExoLogger;
@@ -10,6 +9,7 @@ import org.exoplatform.wiki.WikiException;
 import org.exoplatform.wiki.mow.api.Page;
 import org.exoplatform.wiki.mow.api.Wiki;
 import org.exoplatform.wiki.resolver.TitleResolver;
+import org.exoplatform.wiki.service.WikiService;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,12 +17,20 @@ import org.xwiki.rendering.syntax.Syntax;
 
 import java.io.IOException;
 
-public class WikiModule extends AbstractInjector {
+public class WikiModule {
 
     /**
      * The log.
      */
     private final Log LOG = ExoLogger.getLogger(WikiModule.class);
+
+    protected WikiService wikiService;
+
+    public WikiModule(WikiService wikiService) {
+        this.wikiService = wikiService;
+
+    }
+
 
     /**
      * Creates the user wiki.

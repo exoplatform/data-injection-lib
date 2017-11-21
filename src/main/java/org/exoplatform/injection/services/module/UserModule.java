@@ -1,18 +1,23 @@
 package org.exoplatform.injection.services.module;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import org.exoplatform.commons.utils.PropertyManager;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.ComponentRequestLifecycle;
-import org.exoplatform.injection.services.AbstractInjector;
+import org.exoplatform.injection.services.AbstractModule;
 import org.exoplatform.injection.services.helper.InjectorUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.organization.Group;
 import org.exoplatform.services.organization.MembershipType;
+import org.exoplatform.services.organization.OrganizationService;
 import org.exoplatform.services.organization.User;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.model.Profile;
 import org.exoplatform.social.core.identity.provider.OrganizationIdentityProvider;
 import org.exoplatform.social.core.image.ImageUtils;
+import org.exoplatform.social.core.manager.IdentityManager;
+import org.exoplatform.social.core.manager.RelationshipManager;
 import org.exoplatform.social.core.model.AvatarAttachment;
 import org.exoplatform.social.core.relationship.model.Relationship;
 import org.exoplatform.webui.exception.MessageException;
@@ -23,12 +28,23 @@ import org.json.JSONObject;
 import java.util.Arrays;
 import java.util.Map;
 
-public class UserModule extends AbstractInjector {
+public class UserModule extends AbstractModule {
 
     /**
      * The log.
      */
     private final Log LOG = ExoLogger.getLogger(UserModule.class);
+
+    protected IdentityManager identityManager;
+    protected OrganizationService organizationService;
+    protected RelationshipManager relationshipManager;
+
+    public UserModule(OrganizationService organizationService, IdentityManager identityManager, RelationshipManager relationshipManager) {
+        this.organizationService = organizationService;
+        this.identityManager = identityManager;
+        this.relationshipManager = relationshipManager;
+
+    }
 
     /**
      * The Constant PLATFORM_USERS_GROUP.
@@ -116,8 +132,15 @@ public class UserModule extends AbstractInjector {
         user.setEmail(email);
         user.setFirstName(firstname);
         user.setLastName(lastname);
-        user.setPassword(password);
+        user.setLastName(password);
+        //
+        // Creates a 32 chars length of string from the defined array of
+        // characters including numeric and alphabetic characters.
+        //
+        if (PropertyManager.getProperty(USER_MODULE_RANDOM_PASSWORD_PROPERTY).equalsIgnoreCase(USER_MODULE_ENABLE)) {
+            user.setPassword(RandomStringUtils.random(32, 0, 8, true, true, "eXoTribe".toCharArray()));
 
+        }
         try {
             organizationService.getUserHandler().createUser(user, true);
         } catch (Exception e) {

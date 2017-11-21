@@ -1,11 +1,15 @@
 package org.exoplatform.injection.services.module;
 
-import org.exoplatform.injection.services.AbstractInjector;
 import org.exoplatform.injection.services.helper.InjectorUtils;
+import org.exoplatform.services.jcr.RepositoryService;
+import org.exoplatform.services.jcr.ext.app.SessionProviderService;
 import org.exoplatform.services.jcr.ext.common.SessionProvider;
+import org.exoplatform.services.jcr.ext.hierarchy.NodeHierarchyCreator;
+import org.exoplatform.services.listener.ListenerService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.organization.Membership;
+import org.exoplatform.services.organization.OrganizationService;
 import org.exoplatform.services.security.ConversationState;
 import org.exoplatform.services.security.Identity;
 import org.exoplatform.services.security.MembershipEntry;
@@ -20,11 +24,24 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 
-public class DocumentModule extends AbstractInjector {
+public class DocumentModule {
     /**
      * The log.
      */
     private final Log LOG = ExoLogger.getLogger(DocumentModule.class);
+    protected RepositoryService repositoryService;
+    protected NodeHierarchyCreator nodeHierarchyCreator;
+    protected SessionProviderService sessionProviderService;
+    protected ListenerService listenerService;
+    protected OrganizationService organizationService;
+
+    public DocumentModule(RepositoryService repositoryService, NodeHierarchyCreator nodeHierarchyCreator,SessionProviderService sessionProviderService, ListenerService listenerService, OrganizationService organizationService) {
+        this.repositoryService = repositoryService;
+        this.nodeHierarchyCreator = nodeHierarchyCreator;
+        this.sessionProviderService = sessionProviderService;
+        this.listenerService = listenerService;
+        this.organizationService = organizationService;
+    }
 
     /**
      * The file created activity.

@@ -1,11 +1,11 @@
 package org.exoplatform.injection.services.module;
 
 import org.exoplatform.commons.utils.ListAccess;
+import org.exoplatform.forum.common.jcr.KSDataLocation;
 import org.exoplatform.forum.common.jcr.PropertyReader;
 import org.exoplatform.forum.service.*;
 import org.exoplatform.forum.service.filter.model.ForumFilter;
 import org.exoplatform.forum.service.impl.model.PostFilter;
-import org.exoplatform.injection.services.AbstractInjector;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.json.JSONArray;
@@ -17,11 +17,19 @@ import javax.jcr.NodeIterator;
 import java.util.Date;
 import java.util.List;
 
-public class ForumModule extends AbstractInjector {
+public class ForumModule {
     /**
      * The log.
      */
     private final Log LOG = ExoLogger.getLogger(ForumModule.class);
+
+    protected ForumService forumService;
+    protected KSDataLocation ksDataLocation;
+
+    public ForumModule(ForumService forumService, KSDataLocation ksDataLocation) {
+        this.forumService = forumService;
+        this.ksDataLocation = ksDataLocation;
+    }
 
     /**
      * Creates the forum contents.

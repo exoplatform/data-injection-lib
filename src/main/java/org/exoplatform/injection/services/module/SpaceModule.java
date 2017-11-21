@@ -2,28 +2,41 @@ package org.exoplatform.injection.services.module;
 
 
 import org.apache.commons.lang.StringUtils;
-import org.exoplatform.container.component.ComponentRequestLifecycle;
-import org.exoplatform.container.component.RequestLifeCycle;
-import org.exoplatform.injection.services.AbstractInjector;
+import org.exoplatform.commons.persistence.impl.EntityManagerService;
+import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.injection.services.helper.InjectorUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.provider.SpaceIdentityProvider;
+import org.exoplatform.social.core.manager.IdentityManager;
 import org.exoplatform.social.core.model.AvatarAttachment;
 import org.exoplatform.social.core.space.SpaceUtils;
 import org.exoplatform.social.core.space.impl.DefaultSpaceApplicationHandler;
 import org.exoplatform.social.core.space.model.Space;
+import org.exoplatform.social.core.space.spi.SpaceService;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class SpaceModule extends AbstractInjector {
+import javax.persistence.EntityManager;
+
+public class SpaceModule {
 
     /**
      * The log.
      */
     private final Log LOG = ExoLogger.getLogger(SpaceModule.class);
+
+    protected SpaceService spaceService;
+
+    protected IdentityManager identityManager;
+
+    public SpaceModule(SpaceService spaceService, IdentityManager identityManager) {
+        this.spaceService = spaceService;
+        this.identityManager = identityManager;
+
+    }
 
     /**
      * Creates the spaces.
@@ -98,12 +111,9 @@ public class SpaceModule extends AbstractInjector {
      * @param creator the creator
      */
     private boolean createSpace(String name, String creator) {
-        //EntityManagerService entityManagerService = CommonsUtils.getService(EntityManagerService.class);
-        //ChromatticManager chromatticManager = CommonsUtils.getService(ChromatticManager.class);
         Space target = null;
         boolean spaceCreated = true;
         try {
-            //RequestLifeCycle.begin(entityManagerService);
             target = spaceService.getSpaceByDisplayName(name);
 
             if (target != null) {
@@ -125,14 +135,12 @@ public class SpaceModule extends AbstractInjector {
                 space.setPrettyName(SpaceUtils.buildPrettyName(space));
             }
             space.setType(DefaultSpaceApplicationHandler.NAME);
-            //RequestLifeCycle.begin(chromatticManager);
             spaceService.createSpace(space, creator);
         } catch (Exception E) {
             LOG.error("========= ERROR when create space {} ", target.getPrettyName(), E);
             return false;
 
         } finally {
-            //RequestLifeCycle.end();
 
         }
         return spaceCreated;
@@ -156,21 +164,54 @@ public class SpaceModule extends AbstractInjector {
 
     private void purgeSpace(String displayName) {
         Space target = null;
+        boolean begunTx = false;
         try {
+
+            begunTx = startTx();
             target = spaceService.getSpaceByDisplayName(displayName);
             if (target != null) {
-
-                RequestLifeCycle.begin((ComponentRequestLifecycle) organizationService);
                 spaceService.deleteSpace(target);
-                RequestLifeCycle.end();
 
             }
         } catch (Exception E) {
             LOG.error("Space {} can't be deleted ", target.getPrettyName(), E);
 
         } finally {
+            try {
+                endTx(begunTx);
+            } catch (Exception ex) {
+
+            }
+            //RequestLifeCycle.end();
 
         }
 
+    }
+    protected boolean startTx() {
+        EntityManager em = CommonsUtils.getService(EntityManagerService.class).getEntityManager();
+        if (!em.getTransaction().isActive()) {
+            em.getTransaction().begin();
+            LOG.debug("started new transaction");
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Stops the transaction
+     *
+     * @param requestClose true if need to do really comment
+     */
+    public void endTx(boolean requestClose) {
+        EntityManager em = CommonsUtils.getService(EntityManagerService.class).getEntityManager();
+        try {
+            if (requestClose && em.getTransaction().isActive()) {
+                em.getTransaction().commit();
+                LOG.debug("commited transaction");
+            }
+        } catch (RuntimeException e) {
+            LOG.error("Failed to commit to DB::" + e.getMessage(), e);
+            em.getTransaction().rollback();
+        }
     }
 }

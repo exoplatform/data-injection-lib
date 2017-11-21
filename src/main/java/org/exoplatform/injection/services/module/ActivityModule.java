@@ -1,6 +1,5 @@
 package org.exoplatform.injection.services.module;
 
-import org.exoplatform.injection.services.AbstractInjector;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.common.RealtimeListAccess;
@@ -16,7 +15,7 @@ import org.json.JSONObject;
 
 import java.util.List;
 
-public class ActivityModule extends AbstractInjector {
+public class ActivityModule{
     /**
      * The log.
      */

@@ -3,15 +3,12 @@ package org.exoplatform.injection.services.module;
 
 import org.exoplatform.calendar.model.Calendar;
 import org.exoplatform.calendar.model.Event;
-import org.exoplatform.calendar.service.CalendarEvent;
-import org.exoplatform.calendar.service.CalendarSetting;
-import org.exoplatform.calendar.service.EventQuery;
-import org.exoplatform.calendar.service.GroupCalendarData;
-import org.exoplatform.injection.services.AbstractInjector;
+import org.exoplatform.calendar.service.*;
 import org.exoplatform.injection.services.helper.InjectorUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.organization.Group;
+import org.exoplatform.services.organization.OrganizationService;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,12 +17,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CalendarModule extends AbstractInjector {
+public class CalendarModule {
 
     /**
      * The log.
      */
     private final Log LOG = ExoLogger.getLogger(CalendarModule.class);
+
+    protected CalendarService calendarService;
+
+    protected ExtendedCalendarService extendedCalendarService;
+    protected OrganizationService organizationService;
+
+    public CalendarModule(CalendarService calendarService, ExtendedCalendarService extendedCalendarService,OrganizationService organizationService) {
+        this.calendarService = calendarService;
+        this.extendedCalendarService = extendedCalendarService;
+        this.organizationService = organizationService;
+
+    }
 
     /**
      * Sets the calendar colors.

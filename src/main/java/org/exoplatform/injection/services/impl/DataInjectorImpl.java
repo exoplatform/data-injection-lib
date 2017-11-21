@@ -2,6 +2,8 @@ package org.exoplatform.injection.services.impl;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.exoplatform.container.PortalContainer;
+import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ValueParam;
 import org.exoplatform.injection.services.DataInjector;
@@ -239,35 +241,35 @@ public class DataInjectorImpl implements DataInjector {
     public void purge(String scenarioName) {
 
         LOG.info("Purge {} .............", this.getClass().getName());
+        InjectorMonitor injectorMonitor = new InjectorMonitor("Data Injection Purge Process");
         //--- Start data injection
         String downloadUrl = "";
         try {
+            RequestLifeCycle.begin(PortalContainer.getInstance());
+
             JSONObject scenarioData = scenarios.get(scenarioName).getJSONObject("data");
 
             if (scenarioData.has("spaces")) {
                 LOG.info("Create " + scenarioData.getJSONArray("spaces").length() + " spaces.");
+                injectorMonitor.start("Purging spaces");
                 spaceModule_.purgeSpaces(scenarioData.getJSONArray("spaces"));
+                injectorMonitor.stop();
             }
-
-            /** Do not need to purge user to avoid : cannot create a deleted users
-             if (scenarioData.has("users")) {
-             LOG.info("Purge " + scenarioData.getJSONArray("users").length() + " users.");
-             userModule_.purgeUsers(scenarioData.getJSONArray("users"));
-
-             }
-             */
-
-
             if (scenarioData.has("relations")) {
                 LOG.info("Purge " + scenarioData.getJSONArray("relations").length() + " relations.");
+                injectorMonitor.start("Purging spaces");
                 userModule_.purgeRelations(scenarioData.getJSONArray("relations"));
+                injectorMonitor.stop();
             }
 
 
             LOG.info("Data purging has been done successfully.............");
+            LOG.info(injectorMonitor.prettyPrint());
 
         } catch (JSONException e) {
             LOG.error("Syntax error when reading scenario " + scenarioName, e);
+        } finally {
+            RequestLifeCycle.end();
         }
     }
 
