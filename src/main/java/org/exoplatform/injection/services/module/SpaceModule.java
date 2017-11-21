@@ -4,6 +4,8 @@ package org.exoplatform.injection.services.module;
 import org.apache.commons.lang.StringUtils;
 import org.exoplatform.commons.persistence.impl.EntityManagerService;
 import org.exoplatform.commons.utils.CommonsUtils;
+import org.exoplatform.container.PortalContainer;
+import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.injection.services.helper.InjectorUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
@@ -152,12 +154,16 @@ public class SpaceModule {
         for (int i = 0; i < spaces.length(); i++) {
 
             try {
+
                 JSONObject space = spaces.getJSONObject(i);
+                RequestLifeCycle.begin(PortalContainer.getInstance());
 
                 purgeSpace(space.getString("displayName"));
 
             } catch (JSONException e) {
                 LOG.error("Syntax error on space n°" + i, e);
+            } finally {
+                RequestLifeCycle.end();
             }
         }
     }
