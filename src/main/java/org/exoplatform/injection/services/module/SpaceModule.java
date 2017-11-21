@@ -5,10 +5,12 @@ import org.apache.commons.lang.StringUtils;
 import org.exoplatform.commons.persistence.impl.EntityManagerService;
 import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.PortalContainer;
+import org.exoplatform.container.component.ComponentRequestLifecycle;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.injection.services.helper.InjectorUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.services.organization.OrganizationService;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.provider.SpaceIdentityProvider;
 import org.exoplatform.social.core.manager.IdentityManager;
@@ -30,13 +32,18 @@ public class SpaceModule {
      */
     private final Log LOG = ExoLogger.getLogger(SpaceModule.class);
 
+    private static Boolean requestStarted = false;
+
     protected SpaceService spaceService;
 
     protected IdentityManager identityManager;
 
-    public SpaceModule(SpaceService spaceService, IdentityManager identityManager) {
+    protected OrganizationService organizationService;
+
+    public SpaceModule(SpaceService spaceService, IdentityManager identityManager, OrganizationService organizationService) {
         this.spaceService = spaceService;
         this.identityManager = identityManager;
+        this.organizationService = organizationService;
 
     }
 
@@ -156,14 +163,13 @@ public class SpaceModule {
             try {
 
                 JSONObject space = spaces.getJSONObject(i);
-                RequestLifeCycle.begin(PortalContainer.getInstance());
 
                 purgeSpace(space.getString("displayName"));
 
             } catch (JSONException e) {
                 LOG.error("Syntax error on space n°" + i, e);
             } finally {
-                RequestLifeCycle.end();
+                //RequestLifeCycle.end();
             }
         }
     }
@@ -173,10 +179,12 @@ public class SpaceModule {
         boolean begunTx = false;
         try {
 
-            begunTx = startTx();
+            //begunTx = startTx();
             target = spaceService.getSpaceByDisplayName(displayName);
             if (target != null) {
+                RequestLifeCycle.begin((ComponentRequestLifecycle)organizationService);
                 spaceService.deleteSpace(target);
+                RequestLifeCycle.end();
 
             }
         } catch (Exception E) {
@@ -184,11 +192,9 @@ public class SpaceModule {
 
         } finally {
             try {
-                endTx(begunTx);
             } catch (Exception ex) {
 
             }
-            //RequestLifeCycle.end();
 
         }
 
@@ -218,6 +224,26 @@ public class SpaceModule {
         } catch (RuntimeException e) {
             LOG.error("Failed to commit to DB::" + e.getMessage(), e);
             em.getTransaction().rollback();
+        }
+    }
+
+
+
+    private void endRequest() {
+        if (requestStarted && organizationService instanceof ComponentRequestLifecycle) {
+            try {
+                ((ComponentRequestLifecycle) organizationService).endRequest(PortalContainer.getInstance());
+            } catch (Exception e) {
+                LOG.warn(e.getMessage(), e);
+            }
+            requestStarted = false;
+        }
+    }
+
+    private void startRequest() {
+        if (organizationService instanceof ComponentRequestLifecycle) {
+            ((ComponentRequestLifecycle) organizationService).startRequest(PortalContainer.getInstance());
+            requestStarted = true;
         }
     }
 }
