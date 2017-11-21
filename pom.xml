@@ -16,32 +16,32 @@
     <name>Data Injection - Service</name>
     <properties>
         <itext.version>2.1.7</itext.version>
-        <platform.version>5.0.x-SNAPSHOT</platform.version>
+        <org.exoplatform.platform.version>5.0.x-SNAPSHOT</org.exoplatform.platform.version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>org.exoplatform.platform</groupId>
             <artifactId>platform</artifactId>
-            <version>${platform.version}</version>
+            <version>${org.exoplatform.platform.version}</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
         <dependency>
             <groupId>org.exoplatform.forum</groupId>
             <artifactId>forum-forum-service</artifactId>
-            <version>${platform.version}</version>
+            <version>${org.exoplatform.platform.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.exoplatform.calendar</groupId>
             <artifactId>calendar-service</artifactId>
-            <version>${platform.version}</version>
+            <version>${org.exoplatform.platform.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.exoplatform.wiki</groupId>
             <artifactId>wiki-service</artifactId>
-            <version>${platform.version}</version>
+            <version>${org.exoplatform.platform.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
