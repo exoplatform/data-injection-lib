@@ -1,4 +1,4 @@
-package org.exoplatform.injection.services.module;
+package org.exoplatform.injection.core.module;
 
 import org.exoplatform.commons.utils.ListAccess;
 import org.exoplatform.forum.common.jcr.KSDataLocation;

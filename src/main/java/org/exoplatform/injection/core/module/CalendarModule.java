@@ -1,10 +1,10 @@
-package org.exoplatform.injection.services.module;
+package org.exoplatform.injection.core.module;
 
 
 import org.exoplatform.calendar.model.Calendar;
 import org.exoplatform.calendar.model.Event;
 import org.exoplatform.calendar.service.*;
-import org.exoplatform.injection.services.helper.InjectorUtils;
+import org.exoplatform.injection.helper.InjectorUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.organization.Group;

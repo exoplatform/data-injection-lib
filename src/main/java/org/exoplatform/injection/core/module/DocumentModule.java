@@ -1,6 +1,6 @@
-package org.exoplatform.injection.services.module;
+package org.exoplatform.injection.core.module;
 
-import org.exoplatform.injection.services.helper.InjectorUtils;
+import org.exoplatform.injection.helper.InjectorUtils;
 import org.exoplatform.services.jcr.RepositoryService;
 import org.exoplatform.services.jcr.ext.app.SessionProviderService;
 import org.exoplatform.services.jcr.ext.common.SessionProvider;

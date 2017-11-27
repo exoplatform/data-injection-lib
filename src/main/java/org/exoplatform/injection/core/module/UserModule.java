@@ -1,11 +1,11 @@
-package org.exoplatform.injection.services.module;
+package org.exoplatform.injection.core.module;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.exoplatform.commons.utils.PropertyManager;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.ComponentRequestLifecycle;
 import org.exoplatform.injection.services.AbstractModule;
-import org.exoplatform.injection.services.helper.InjectorUtils;
+import org.exoplatform.injection.helper.InjectorUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.organization.Group;

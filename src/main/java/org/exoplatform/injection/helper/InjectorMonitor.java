@@ -1,4 +1,4 @@
-package org.exoplatform.injection.services.helper;
+package org.exoplatform.injection.helper;
 
 import java.text.NumberFormat;
 import java.util.LinkedList;

@@ -1,4 +1,4 @@
-package org.exoplatform.injection.services.scheduler;
+package org.exoplatform.injection.client.scheduler;
 
 import org.exoplatform.injection.services.DataInjector;
 import org.exoplatform.services.log.ExoLogger;

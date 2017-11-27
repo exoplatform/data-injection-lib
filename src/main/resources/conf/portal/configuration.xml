@@ -4,27 +4,27 @@
                xmlns="http://www.exoplatform.org/xml/ns/kernel_1_2.xsd">
 
     <component>
-        <type>org.exoplatform.injection.services.module.ActivityModule</type>
+        <type>org.exoplatform.injection.core.module.ActivityModule</type>
     </component>
 
     <component>
-        <type>org.exoplatform.injection.services.module.CalendarModule</type>
+        <type>org.exoplatform.injection.core.module.CalendarModule</type>
     </component>
     <component>
-        <type>org.exoplatform.injection.services.module.DocumentModule</type>
+        <type>org.exoplatform.injection.core.module.DocumentModule</type>
     </component>
     <component>
-        <type>org.exoplatform.injection.services.module.ForumModule</type>
+        <type>org.exoplatform.injection.core.module.ForumModule</type>
     </component>
     <component>
-        <type>org.exoplatform.injection.services.module.SpaceModule</type>
+        <type>org.exoplatform.injection.core.module.SpaceModule</type>
     </component>
     <component>
-        <type>org.exoplatform.injection.services.module.UserModule</type>
+        <type>org.exoplatform.injection.core.module.UserModule</type>
     </component>
 
     <component>
-        <type>org.exoplatform.injection.services.module.WikiModule</type>
+        <type>org.exoplatform.injection.core.module.WikiModule</type>
     </component>
     <component>
         <key>org.exoplatform.injection.services.DataInjector</key>
@@ -37,7 +37,7 @@
         </init-params>
     </component>
     <component>
-        <type>org.exoplatform.injection.services.ws.DataInjectorREST</type>
+        <type>org.exoplatform.injection.client.ws.DataInjectorREST</type>
     </component>
 
     <!--

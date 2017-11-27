@@ -1,4 +1,4 @@
-package org.exoplatform.injection.services.module;
+package org.exoplatform.injection.core.module;
 
 
 import org.apache.commons.lang.StringUtils;
@@ -7,7 +7,7 @@ import org.exoplatform.commons.utils.CommonsUtils;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.ComponentRequestLifecycle;
 import org.exoplatform.container.component.RequestLifeCycle;
-import org.exoplatform.injection.services.helper.InjectorUtils;
+import org.exoplatform.injection.helper.InjectorUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.organization.OrganizationService;

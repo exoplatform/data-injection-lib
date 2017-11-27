@@ -1,4 +1,4 @@
-package org.exoplatform.injection.services.ws;
+package org.exoplatform.injection.client.ws;
 
 import org.exoplatform.injection.services.DataInjector;
 import org.exoplatform.services.log.ExoLogger;
