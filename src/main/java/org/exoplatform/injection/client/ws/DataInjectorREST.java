@@ -9,6 +9,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.*;
+import java.util.HashMap;
 
 @Path("tribe/onboarding/data/")
 public class DataInjectorREST implements ResourceContainer {
@@ -34,7 +35,7 @@ public class DataInjectorREST implements ResourceContainer {
     public Response inject(@Context SecurityContext sc, @Context UriInfo uriInfo) throws Exception {
 
         try {
-            this.dataInjector.inject();
+            this.dataInjector.inject(new HashMap<>());
 
         } catch (Exception e) {
             log.error("Data Injection Failed", e);
@@ -55,7 +56,7 @@ public class DataInjectorREST implements ResourceContainer {
 
 
         try {
-            this.dataInjector.purge();
+            this.dataInjector.purge(new HashMap<>());
         } catch (Exception e) {
             log.error("Data purging failed", e);
             return Response.serverError()

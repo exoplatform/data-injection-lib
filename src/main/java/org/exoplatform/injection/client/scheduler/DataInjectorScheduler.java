@@ -7,6 +7,8 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
+import java.util.HashMap;
+
 public class DataInjectorScheduler implements Job {
 
     private static final Log LOG = ExoLogger.getLogger(DataInjectorScheduler.class);
@@ -20,7 +22,7 @@ public class DataInjectorScheduler implements Job {
     @Override
     public void execute(final JobExecutionContext context) throws JobExecutionException {
         try {
-            this.dataInjector.inject();
+            this.dataInjector.inject(new HashMap<>());
         } catch (Exception e) {
             LOG.error("Data Injection Failed", e);
         }

@@ -119,7 +119,7 @@ public class SpaceModule {
      * @param name    the name
      * @param creator the creator
      */
-    private boolean createSpace(String name, String creator) {
+    public boolean createSpace(String name, String creator) {
         Space target = null;
         boolean spaceCreated = true;
         try {

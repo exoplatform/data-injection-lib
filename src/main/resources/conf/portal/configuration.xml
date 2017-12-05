@@ -26,6 +26,7 @@
     <component>
         <type>org.exoplatform.injection.core.module.WikiModule</type>
     </component>
+
     <component>
         <key>org.exoplatform.injection.services.DataInjector</key>
         <type>org.exoplatform.injection.services.impl.DataInjectorImpl</type>
@@ -39,7 +40,6 @@
     <component>
         <type>org.exoplatform.injection.client.ws.DataInjectorREST</type>
     </component>
-
     <!--
     <external-component-plugins>
         <target-component>org.exoplatform.services.scheduler.JobSchedulerService</target-component>

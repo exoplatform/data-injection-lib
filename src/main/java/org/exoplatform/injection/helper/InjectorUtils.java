@@ -45,7 +45,6 @@ public class InjectorUtils {
      * @throws Exception
      */
     public static String getConfigPath(String defaultDataPath) throws Exception {
-
         String injectorDataFolder = null;
         ConfigurationManager confManager = (ConfigurationManager) RootContainer.getInstance().getComponentInstanceOfType(ConfigurationManager.class);
         try {

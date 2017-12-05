@@ -80,6 +80,7 @@ public class DataInjectorImpl implements DataInjector {
     ActivityModule activityModule_;
 
     private String dataFolderPath = "";
+    private Map<String, Integer> completion;
 
     public DataInjectorImpl(InitParams params, UserModule userModule, SpaceModule spaceModule, CalendarModule calendarModule, WikiModule wikiModule, ForumModule forumModule, DocumentModule documentModule, ActivityModule activityModule) {
 
@@ -106,7 +107,7 @@ public class DataInjectorImpl implements DataInjector {
     /**
      * Load injection scripts
      */
-    public void setup(String dataFolderPath) {
+    public Map setup(String dataFolderPath) {
         scenarios = new HashMap<String, JSONObject>();
         try {
 
@@ -130,28 +131,29 @@ public class DataInjectorImpl implements DataInjector {
         } catch (Exception e) {
             LOG.error("Unable to find scenario file", e);
         }
+        return scenarios;
     }
 
     @Override
-    public void inject() throws Exception {
+    public void inject(Map<String, Integer> completion) throws Exception {
         //--- Inject Data into the Store
         scenarios.forEach((k, v) -> {
-            inject(k);
+            inject(k,completion);
         });
 
     }
 
     @Override
-    public void purge() throws Exception {
+    public void purge(Map<String, Integer> completion) throws Exception {
         //--- Purge Data into the Store
         scenarios.forEach((k, v) -> {
-            purge(k);
+            purge(k,completion);
         });
 
 
     }
 
-    public void inject(String scenarioName) {
+    public void inject(String scenarioName, Map<String, Integer> completion) {
 
         LOG.info("Start {} .............", this.getClass().getName());
         InjectorMonitor injectorMonitor = new InjectorMonitor("Data Injection Process");
@@ -161,8 +163,10 @@ public class DataInjectorImpl implements DataInjector {
             JSONObject scenarioData = scenarios.get(scenarioName).getJSONObject("data");
             if (scenarioData.has("users")) {
                 LOG.info("Create " + scenarioData.getJSONArray("users").length() + " users.");
+                completion.put("Users", 0);
                 injectorMonitor.start("Processing users data");
                 userModule_.createUsers(scenarioData.getJSONArray("users"), dataFolderPath);
+                completion.put("Users", 100);
                 injectorMonitor.stop();
 
             }
@@ -176,8 +180,10 @@ public class DataInjectorImpl implements DataInjector {
 
             if (scenarioData.has("spaces")) {
                 LOG.info("Create " + scenarioData.getJSONArray("spaces").length() + " spaces.");
+                completion.put("Spaces", 0);
                 injectorMonitor.start("Processing spaces data");
                 spaceModule_.createSpaces(scenarioData.getJSONArray("spaces"), dataFolderPath);
+                completion.put("Spaces", 100);
                 injectorMonitor.stop();
             }
 /**
@@ -190,8 +196,10 @@ public class DataInjectorImpl implements DataInjector {
 
             if (scenarioData.has("wikis")) {
                 LOG.info("Create " + scenarioData.getJSONArray("wikis").length() + " wikis.");
+                completion.put("Wiki", 0);
                 injectorMonitor.start("Processing wikis data");
                 wikiModule_.createUserWiki(scenarioData.getJSONArray("wikis"), dataFolderPath);
+                completion.put("Wiki", 100);
                 injectorMonitor.stop();
             }
 
@@ -205,14 +213,18 @@ public class DataInjectorImpl implements DataInjector {
             }
             if (scenarioData.has("documents")) {
                 LOG.info("Create " + scenarioData.getJSONArray("documents").length() + " documents.");
+                completion.put("Documents", 0);
                 injectorMonitor.start("Processing documents data");
                 documentModule_.uploadDocuments(scenarioData.getJSONArray("documents"), dataFolderPath);
+                completion.put("Documents", 100);
                 injectorMonitor.stop();
             }
             if (scenarioData.has("forums")) {
                 LOG.info("Create " + scenarioData.getJSONArray("forums").length() + " forums.");
+                completion.put("Forums", 0);
                 injectorMonitor.start("Processing forums data");
                 forumModule_.createForumContents(scenarioData.getJSONArray("forums"));
+                completion.put("Forums", 100);
                 injectorMonitor.stop();
             }
 
@@ -238,7 +250,7 @@ public class DataInjectorImpl implements DataInjector {
         }
     }
 
-    public void purge(String scenarioName) {
+    public void purge(String scenarioName, Map<String, Integer> completion) {
 
         LOG.info("Purge {} .............", this.getClass().getName());
         InjectorMonitor injectorMonitor = new InjectorMonitor("Data Injection Purge Process");
@@ -279,7 +291,7 @@ public class DataInjectorImpl implements DataInjector {
      * @param inputStream the input stream
      * @return the data
      */
-    public String getData(InputStream inputStream) {
+    public static String getData(InputStream inputStream) {
         String out = "";
         StringWriter writer = new StringWriter();
         try {
