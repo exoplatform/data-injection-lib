@@ -2,14 +2,18 @@ package org.exoplatform.injection.core.module;
 
 
 import org.apache.commons.lang.StringUtils;
+
+import org.exoplatform.commons.persistence.impl.EntityManagerHolder;
 import org.exoplatform.commons.persistence.impl.EntityManagerService;
 import org.exoplatform.commons.utils.CommonsUtils;
+import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.ComponentRequestLifecycle;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.injection.helper.InjectorUtils;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.services.organization.Group;
 import org.exoplatform.services.organization.OrganizationService;
 import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.provider.SpaceIdentityProvider;
@@ -55,10 +59,9 @@ public class SpaceModule {
      */
     public void createSpaces(JSONArray spaces, String defaultDataFolderPath) {
         for (int i = 0; i < spaces.length(); i++) {
-
+            RequestLifeCycle.begin(PortalContainer.getInstance());
             try {
                 JSONObject space = spaces.getJSONObject(i);
-                //RequestLifeCycle.begin(ExoContainerContext.getCurrentContainer());
                 boolean created = createSpace(space.getString("displayName"), space.getString("creator"));
                 //---Create Avatar/Add members only when a space is created
                 if (created) {
@@ -76,10 +79,11 @@ public class SpaceModule {
                     createSpaceAvatar(space.getString("displayName"), space.getString("creator"), space.getString("avatar"), defaultDataFolderPath);
 
                 }
-                //RequestLifeCycle.end();
 
             } catch (JSONException e) {
                 LOG.error("Syntax error on space n°" + i, e);
+            } finally {
+              RequestLifeCycle.end();
             }
         }
     }
@@ -104,11 +108,11 @@ public class SpaceModule {
                     space.setEditor(editor);
                     spaceService.updateSpaceAvatar(space);
                 } catch (Exception e) {
-                    LOG.error("Unable to set avatar for space " + space.getDisplayName(), e.getMessage());
+                    LOG.error("Unable to set avatar for space " + space.getDisplayName(), e);
                 }
             }
         } catch (Exception e) {
-            LOG.error("Unable to create space " + space.getDisplayName(), e.getMessage());
+            LOG.error("Unable to create space " + space.getDisplayName(), e);
         }
 
     }
@@ -128,13 +132,17 @@ public class SpaceModule {
             if (target != null) {
                 return false;
             }
+            String groupId = "/spaces/" + SpaceUtils.cleanString(name);
+            forceDeleteGroupOfSpaceIfExists(groupId);
 
             Space space = new Space();
             // space.setId(name);
             space.setDisplayName(name);
             space.setPrettyName(name);
             space.setDescription(StringUtils.EMPTY);
-            space.setGroupId("/spaces/" + space.getPrettyName());
+
+            space.setGroupId(groupId);
+
             space.setRegistration(Space.OPEN);
             space.setVisibility(Space.PRIVATE);
             space.setPriority(Space.INTERMEDIATE_PRIORITY);
@@ -146,7 +154,7 @@ public class SpaceModule {
             space.setType(DefaultSpaceApplicationHandler.NAME);
             spaceService.createSpace(space, creator);
         } catch (Exception E) {
-            LOG.error("========= ERROR when create space {} ", target.getPrettyName(), E);
+            LOG.error("========= ERROR when create space " + name, E);
             return false;
 
         } finally {
@@ -157,93 +165,37 @@ public class SpaceModule {
 
     }
 
+    private void forceDeleteGroupOfSpaceIfExists(String groupId) throws Exception {
+      Group spaceGroup = organizationService.getGroupHandler().findGroupById(groupId);
+      if (spaceGroup != null) {
+        LOG.warn("Space group {} already exists, it will be removed before injecting space", groupId);
+        organizationService.getGroupHandler().removeGroup(spaceGroup, true);
+      }
+    }
+
     public void purgeSpaces(JSONArray spaces) {
         for (int i = 0; i < spaces.length(); i++) {
-
             try {
-
                 JSONObject space = spaces.getJSONObject(i);
-
                 purgeSpace(space.getString("displayName"));
-
             } catch (JSONException e) {
                 LOG.error("Syntax error on space n°" + i, e);
-            } finally {
-                //RequestLifeCycle.end();
             }
         }
     }
 
     private void purgeSpace(String displayName) {
         Space target = null;
-        boolean begunTx = false;
+        RequestLifeCycle.begin(PortalContainer.getInstance());
         try {
-
-            //begunTx = startTx();
             target = spaceService.getSpaceByDisplayName(displayName);
             if (target != null) {
-                RequestLifeCycle.begin((ComponentRequestLifecycle)organizationService);
                 spaceService.deleteSpace(target);
-                RequestLifeCycle.end();
-
             }
         } catch (Exception E) {
-            LOG.error("Space {} can't be deleted ", target.getPrettyName(), E);
-
+            LOG.error("Space " + target.getPrettyName() + " can't be deleted ", E);
         } finally {
-            try {
-            } catch (Exception ex) {
-
-            }
-
-        }
-
-    }
-    protected boolean startTx() {
-        EntityManager em = CommonsUtils.getService(EntityManagerService.class).getEntityManager();
-        if (!em.getTransaction().isActive()) {
-            em.getTransaction().begin();
-            LOG.debug("started new transaction");
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Stops the transaction
-     *
-     * @param requestClose true if need to do really comment
-     */
-    public void endTx(boolean requestClose) {
-        EntityManager em = CommonsUtils.getService(EntityManagerService.class).getEntityManager();
-        try {
-            if (requestClose && em.getTransaction().isActive()) {
-                em.getTransaction().commit();
-                LOG.debug("commited transaction");
-            }
-        } catch (RuntimeException e) {
-            LOG.error("Failed to commit to DB::" + e.getMessage(), e);
-            em.getTransaction().rollback();
-        }
-    }
-
-
-
-    private void endRequest() {
-        if (requestStarted && organizationService instanceof ComponentRequestLifecycle) {
-            try {
-                ((ComponentRequestLifecycle) organizationService).endRequest(PortalContainer.getInstance());
-            } catch (Exception e) {
-                LOG.warn(e.getMessage(), e);
-            }
-            requestStarted = false;
-        }
-    }
-
-    private void startRequest() {
-        if (organizationService instanceof ComponentRequestLifecycle) {
-            ((ComponentRequestLifecycle) organizationService).startRequest(PortalContainer.getInstance());
-            requestStarted = true;
+          RequestLifeCycle.end();
         }
     }
 }

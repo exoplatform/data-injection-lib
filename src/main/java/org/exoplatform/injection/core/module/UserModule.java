@@ -3,7 +3,7 @@ package org.exoplatform.injection.core.module;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.exoplatform.commons.utils.PropertyManager;
 import org.exoplatform.container.PortalContainer;
-import org.exoplatform.container.component.ComponentRequestLifecycle;
+import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.injection.services.AbstractModule;
 import org.exoplatform.injection.helper.InjectorUtils;
 import org.exoplatform.services.log.ExoLogger;
@@ -72,8 +72,8 @@ public class UserModule extends AbstractModule {
     public void createUsers(JSONArray users, String defaultFolderPath) {
 
         for (int i = 0; i < users.length(); i++) {
+            RequestLifeCycle.begin(PortalContainer.getInstance());
             try {
-                startRequest();
                 JSONObject user = users.getJSONObject(i);
                 boolean created = createUser(user.getString("username"),
                         user.getString("position"),
@@ -85,11 +85,10 @@ public class UserModule extends AbstractModule {
                 if (created) {
                     saveUserAvatar(user.getString("username"), user.getString("avatar"), defaultFolderPath);
                 }
-                endRequest();
-
-
             } catch (JSONException e) {
                 LOG.error("Syntax error on user n°" + i, e);
+            } finally {
+              RequestLifeCycle.end();
             }
         }
 
@@ -218,7 +217,7 @@ public class UserModule extends AbstractModule {
      */
     public void createRelations(JSONArray relations) {
         for (int i = 0; i < relations.length(); i++) {
-
+            RequestLifeCycle.begin(PortalContainer.getInstance());
             try {
                 JSONObject relation = relations.getJSONObject(i);
                 Identity idInviting = identityManager.getOrCreateIdentity(OrganizationIdentityProvider.NAME, relation.getString("inviting"), false);
@@ -229,38 +228,17 @@ public class UserModule extends AbstractModule {
                 }
             } catch (JSONException e) {
                 LOG.error("Syntax error on relation n°" + i, e);
+            } finally {
+              RequestLifeCycle.end();
             }
-        }
-    }
-
-    private void endRequest() {
-        if (requestStarted && organizationService instanceof ComponentRequestLifecycle) {
-            try {
-                ((ComponentRequestLifecycle) organizationService).endRequest(PortalContainer.getInstance());
-            } catch (Exception e) {
-                LOG.warn(e.getMessage(), e);
-            }
-            requestStarted = false;
-        }
-    }
-
-    private void startRequest() {
-        if (organizationService instanceof ComponentRequestLifecycle) {
-            ((ComponentRequestLifecycle) organizationService).startRequest(PortalContainer.getInstance());
-            requestStarted = true;
         }
     }
 
     public void purgeUsers(JSONArray users) {
         for (int i = 0; i < users.length(); i++) {
             try {
-                startRequest();
                 JSONObject user = users.getJSONObject(i);
                 purgeUser(user.getString("username"));
-
-                endRequest();
-
-
             } catch (JSONException e) {
                 LOG.error("Syntax error on user n°" + i, e);
             }
@@ -293,7 +271,7 @@ public class UserModule extends AbstractModule {
 
     public void purgeRelations(JSONArray relations) {
         for (int i = 0; i < relations.length(); i++) {
-
+            RequestLifeCycle.begin(PortalContainer.getInstance());
             try {
                 JSONObject relation = relations.getJSONObject(i);
                 Identity idInviting = identityManager.getOrCreateIdentity(OrganizationIdentityProvider.NAME, relation.getString("inviting"), false);
@@ -305,6 +283,8 @@ public class UserModule extends AbstractModule {
                 }
             } catch (JSONException e) {
                 LOG.error("Syntax error on relation n°" + i, e);
+            } finally {
+              RequestLifeCycle.end();
             }
         }
 

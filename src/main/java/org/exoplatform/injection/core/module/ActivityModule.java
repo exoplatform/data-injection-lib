@@ -1,5 +1,7 @@
 package org.exoplatform.injection.core.module;
 
+import org.exoplatform.container.PortalContainer;
+import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.common.RealtimeListAccess;
@@ -42,6 +44,7 @@ public class ActivityModule{
     public void pushActivities(JSONArray activities) {
 
         for (int i = 0; i < activities.length(); i++) {
+            RequestLifeCycle.begin(PortalContainer.getInstance());
             try {
                 JSONObject activity = activities.getJSONObject(i);
                 pushActivity(activity);
@@ -50,6 +53,8 @@ public class ActivityModule{
 
             } catch (Exception e) {
                 LOG.error("Error when creating activity n°" + i, e);
+            } finally {
+              RequestLifeCycle.end();
             }
         }
 

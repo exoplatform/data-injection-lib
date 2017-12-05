@@ -1,6 +1,8 @@
 package org.exoplatform.injection.core.module;
 
 import org.exoplatform.commons.utils.ListAccess;
+import org.exoplatform.container.PortalContainer;
+import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.forum.common.jcr.KSDataLocation;
 import org.exoplatform.forum.common.jcr.PropertyReader;
 import org.exoplatform.forum.service.*;
@@ -39,12 +41,14 @@ public class ForumModule {
     public void createForumContents(JSONArray forumContent) {
 
         for (int i = 0; i < forumContent.length(); i++) {
-
+            RequestLifeCycle.begin(PortalContainer.getInstance());
             try {
                 JSONObject category = forumContent.getJSONObject(i);
                 createCategory(category);
             } catch (JSONException e) {
                 LOG.error("Syntax error on space n°" + i, e);
+            } finally {
+              RequestLifeCycle.end();
             }
         }
 
