@@ -53,8 +53,6 @@ public class DataInjectorREST implements ResourceContainer {
     @Path("purge")
     @RolesAllowed("administrators")
     public Response purge(@Context SecurityContext sc, @Context UriInfo uriInfo) throws Exception {
-
-
         try {
             this.dataInjector.purge(new HashMap<>());
         } catch (Exception e) {

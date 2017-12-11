@@ -2,6 +2,7 @@ package org.exoplatform.injection.services.impl;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.container.xml.InitParams;
@@ -138,7 +139,7 @@ public class DataInjectorImpl implements DataInjector {
     public void inject(Map<String, Integer> completion) throws Exception {
         //--- Inject Data into the Store
         scenarios.forEach((k, v) -> {
-            inject(k,completion);
+            inject(k, completion);
         });
 
     }
@@ -146,15 +147,17 @@ public class DataInjectorImpl implements DataInjector {
     @Override
     public void purge(Map<String, Integer> completion) throws Exception {
         //--- Purge Data into the Store
-        scenarios.forEach((k, v) -> {
-            purge(k,completion);
-        });
+        for (Map.Entry<String, JSONObject> scenarioEntry : scenarios.entrySet()) {
+            purge(scenarioEntry.getKey(),completion);
+        }
 
 
     }
 
     public void inject(String scenarioName, Map<String, Integer> completion) {
-
+        PortalContainer portalContainer = PortalContainer.getInstance();
+        ExoContainerContext.setCurrentContainer(portalContainer);
+        enforceCloseTransaction();
         LOG.info("Start {} .............", this.getClass().getName());
         InjectorMonitor injectorMonitor = new InjectorMonitor("Data Injection Process");
         //--- Start data injection
@@ -247,17 +250,22 @@ public class DataInjectorImpl implements DataInjector {
 
         } catch (JSONException e) {
             LOG.error("Syntax error when reading scenario " + scenarioName, e);
+        } finally {
+            enforceCloseTransaction();
+            RequestLifeCycle.begin(portalContainer);
         }
     }
 
     public void purge(String scenarioName, Map<String, Integer> completion) {
 
+        PortalContainer portalContainer = PortalContainer.getInstance();
+        ExoContainerContext.setCurrentContainer(portalContainer);
+        enforceCloseTransaction();
         LOG.info("Purge {} .............", this.getClass().getName());
         InjectorMonitor injectorMonitor = new InjectorMonitor("Data Injection Purge Process");
         //--- Start data injection
         String downloadUrl = "";
         try {
-            RequestLifeCycle.begin(PortalContainer.getInstance());
 
             JSONObject scenarioData = scenarios.get(scenarioName).getJSONObject("data");
 
@@ -281,7 +289,8 @@ public class DataInjectorImpl implements DataInjector {
         } catch (JSONException e) {
             LOG.error("Syntax error when reading scenario " + scenarioName, e);
         } finally {
-            RequestLifeCycle.end();
+            enforceCloseTransaction();
+            RequestLifeCycle.begin(PortalContainer.getInstance());
         }
     }
 
@@ -303,5 +312,16 @@ public class DataInjectorImpl implements DataInjector {
         }
 
         return out;
+    }
+
+    private void enforceCloseTransaction() {
+        while (true) {
+            try {
+                RequestLifeCycle.end();
+            } catch (Exception e) {
+                // All transaction are closed
+                break;
+            }
+        }
     }
 }

@@ -1,5 +1,7 @@
 package org.exoplatform.injection.core.module;
 
+import org.exoplatform.container.PortalContainer;
+import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.injection.helper.InjectorUtils;
 import org.exoplatform.services.jcr.RepositoryService;
 import org.exoplatform.services.jcr.ext.app.SessionProviderService;
@@ -56,6 +58,7 @@ public class DocumentModule {
      */
     public void uploadDocuments(JSONArray documents, String defaultDataFolderPath) {
         for (int i = 0; i < documents.length(); i++) {
+            RequestLifeCycle.begin(PortalContainer.getInstance());
             try {
                 JSONObject document = documents.getJSONObject(i);
                 String filename = document.getString("filename");
@@ -68,6 +71,8 @@ public class DocumentModule {
             } catch (JSONException e) {
                 LOG.error("Syntax error on document n°" + i, e);
 
+            } finally {
+                RequestLifeCycle.end();
             }
         }
     }

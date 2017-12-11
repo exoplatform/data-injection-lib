@@ -1,6 +1,8 @@
 package org.exoplatform.injection.core.module;
 
 
+import org.exoplatform.container.PortalContainer;
+import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.injection.helper.InjectorUtils;
 import org.exoplatform.portal.config.model.PortalConfig;
 import org.exoplatform.services.log.ExoLogger;
@@ -40,12 +42,15 @@ public class WikiModule {
      */
     public void createUserWiki(JSONArray wikis, String defaultDataFolderPath) {
         for (int i = 0; i < wikis.length(); i++) {
+            RequestLifeCycle.begin(PortalContainer.getInstance());
             try {
                 JSONObject wiki = wikis.getJSONObject(i);
                 createOrEditPage(wiki, wiki.has("parent") ? wiki.getString("parent") : "", defaultDataFolderPath);
             } catch (JSONException e) {
                 LOG.error("Syntax error on wiki n°" + i, e);
 
+            } finally {
+                RequestLifeCycle.end();
             }
         }
     }
