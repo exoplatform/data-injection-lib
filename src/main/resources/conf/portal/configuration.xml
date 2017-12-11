@@ -40,26 +40,28 @@
     <component>
         <type>org.exoplatform.injection.client.ws.DataInjectorREST</type>
     </component>
+    <!-- Data Injection CronJob -->
     <!--
     <external-component-plugins>
         <target-component>org.exoplatform.services.scheduler.JobSchedulerService</target-component>
-        <component-plugin profiles="all">
-            <name>TribeDataInjectionInBulk</name>
+        <component-plugin>
+            <name>AddCronJob</name>
             <set-method>addCronJob</set-method>
             <type>org.exoplatform.services.scheduler.CronJob</type>
-            <description>Init job for data injection to eXo Tribe</description>
+            <description>Purge Intercom'users each 4 months</description>
             <init-params>
                 <properties-param>
                     <name>cronjob.info</name>
-                    <description>Configuration parameter of Job execution to inject Data</description>
-                    <property name="jobName" value="TribeDataInjectionJob"/>
-                    <property name="groupName" value="TribeCron"/>
-                    <property name="job" value="org.exoplatform.community.service.injector.sceduler.TribeDataInjectorJob"/>
-                    <property name="expression" value="${exo.tribe.onboarding.DataInjectionJob.expression:* */20 * * * ?}"/>
+                    <description>Configuration for daily send notification</description>
+                    <property name="jobName" value="InjectorCronJob"/>
+                    <property name="groupName" value="Injector"/>
+                    <property name="job" value="org.exoplatform.injection.client.scheduler.DataInjectorScheduler"/>
+                    <property name="expression" value="${exo.data.injection.cron.expression:0 0 21 5 * ?}"/>
                 </properties-param>
             </init-params>
         </component-plugin>
     </external-component-plugins>
     -->
+    <!-- END -->
 
 </configuration>

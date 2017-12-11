@@ -11,7 +11,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.*;
 import java.util.HashMap;
 
-@Path("tribe/onboarding/data/")
+@Path("data/injection/")
 public class DataInjectorREST implements ResourceContainer {
     private static final Log log = ExoLogger.getLogger(DataInjectorREST.class);
 
