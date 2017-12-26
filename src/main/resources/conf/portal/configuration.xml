@@ -33,7 +33,7 @@
         <init-params>
             <value-param>
                 <name>data-injection-folder-path</name>
-                <value>${exo.datat.injection.folder.path:data}</value>
+                <value>${exo.datat.injection.folder.path:injector-dataset}</value>
             </value-param>
         </init-params>
     </component>

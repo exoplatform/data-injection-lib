@@ -34,7 +34,7 @@ public class InjectorUtils {
     /**
      * Fake data Location
      */
-    public static final String DATA_INJECTOR_DEFAULT_FOLDER_PATH = "data";
+    public static final String DATA_INJECTOR_DEFAULT_FOLDER_PATH = "injector-dataset";
 
 
     /**
