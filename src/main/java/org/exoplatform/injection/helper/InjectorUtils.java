@@ -46,14 +46,17 @@ public class InjectorUtils {
      */
     public static String getConfigPath(String defaultDataPath) throws Exception {
         String injectorDataFolder = null;
+
         ConfigurationManager confManager = (ConfigurationManager) RootContainer.getInstance().getComponentInstanceOfType(ConfigurationManager.class);
         try {
             if ((defaultDataPath != null) && (defaultDataPath.length() > 0)) {
-                injectorDataFolder = confManager.getResource(defaultDataPath).getPath();
+
+                injectorDataFolder =System.getProperty( "catalina.base").concat(File.separator).concat(defaultDataPath);
+
             }
 
         } catch (Exception ex) {
-            injectorDataFolder = confManager.getResource(DATA_INJECTOR_DEFAULT_FOLDER_PATH).getPath();
+            //injectorDataFolder = confManager.getResource(DATA_INJECTOR_DEFAULT_FOLDER_PATH).getPath();
         }
         try {
             injectorDataFolder = URLDecoder.decode(injectorDataFolder, "UTF-8");

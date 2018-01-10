@@ -185,7 +185,7 @@ public class DataInjectorImpl implements DataInjector {
                 LOG.info("Create " + scenarioData.getJSONArray("spaces").length() + " spaces.");
                 completion.put("Spaces", 0);
                 injectorMonitor.start("Processing spaces data");
-                spaceModule_.createSpaces(scenarioData.getJSONArray("spaces"), dataFolderPath);
+                spaceModule_.createSpaces(scenarioData.getJSONArray("spaces"), dataFolderPath, "exo test ");
                 completion.put("Spaces", 100);
                 injectorMonitor.stop();
             }
@@ -272,7 +272,7 @@ public class DataInjectorImpl implements DataInjector {
             if (scenarioData.has("spaces")) {
                 LOG.info("Create " + scenarioData.getJSONArray("spaces").length() + " spaces.");
                 injectorMonitor.start("Purging spaces");
-                spaceModule_.purgeSpaces(scenarioData.getJSONArray("spaces"));
+                spaceModule_.purgeSpaces(scenarioData.getJSONArray("spaces"), "exo test ");
                 injectorMonitor.stop();
             }
             if (scenarioData.has("relations")) {

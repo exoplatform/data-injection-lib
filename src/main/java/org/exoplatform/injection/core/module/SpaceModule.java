@@ -54,14 +54,14 @@ public class SpaceModule {
      * @param spaces                the spaces
      * @param defaultDataFolderPath the default data folder path
      */
-    public void createSpaces(JSONArray spaces, String defaultDataFolderPath) {
+    public void createSpaces(JSONArray spaces, String defaultDataFolderPath, String spacePrefix) {
         for (int i = 0; i < spaces.length(); i++) {
             RequestLifeCycle.begin(PortalContainer.getInstance());
 
             try {
                 JSONObject space = spaces.getJSONObject(i);
                 //RequestLifeCycle.begin(ExoContainerContext.getCurrentContainer());
-                boolean created = createSpace(space.getString("displayName"), space.getString("creator"));
+                boolean created = createSpace(space.getString("displayName"), space.getString("creator"), spacePrefix);
                 //---Create Avatar/Add members only when a space is created
                 if (created) {
 
@@ -123,7 +123,7 @@ public class SpaceModule {
      * @param name    the name
      * @param creator the creator
      */
-    public boolean createSpace(String name, String creator) {
+    public boolean createSpace(String name, String creator, String spacePrefix) {
         Space target = null;
         boolean spaceCreated = true;
         try {
@@ -138,7 +138,7 @@ public class SpaceModule {
             Space space = new Space();
             // space.setId(name);
             space.setDisplayName(name);
-            space.setPrettyName(name);
+            space.setPrettyName(spacePrefix.concat(name));
             space.setDescription(StringUtils.EMPTY);
             space.setGroupId("/spaces/" + space.getPrettyName());
             space.setGroupId(groupId);
@@ -164,25 +164,25 @@ public class SpaceModule {
 
     }
 
-    public void purgeSpaces(JSONArray spaces) {
+    public void purgeSpaces(JSONArray spaces, String prefixSpace) {
         for (int i = 0; i < spaces.length(); i++) {
             try {
                 JSONObject space = spaces.getJSONObject(i);
-                purgeSpace(space.getString("displayName"));
+                purgeSpace(space.getString("displayName"), prefixSpace);
             } catch (JSONException e) {
                 LOG.error("Syntax error on space n°" + i, e);
             }
         }
     }
 
-    private void purgeSpace(String displayName) {
+    private void purgeSpace(String displayName, String prefixSpace) {
         Space target = null;
         RequestLifeCycle.begin(PortalContainer.getInstance());
         try {
 
             //begunTx = startTx();
             target = spaceService.getSpaceByDisplayName(displayName);
-            if (target != null) {
+            if ((target != null) && (target.getPrettyName().startsWith(SpaceUtils.cleanString(prefixSpace)))) {
                 spaceService.deleteSpace(target);
             }
         } catch (Exception E) {
