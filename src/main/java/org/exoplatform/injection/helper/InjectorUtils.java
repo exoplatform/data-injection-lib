@@ -8,6 +8,7 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.social.core.image.ImageUtils;
 import org.exoplatform.social.core.model.AvatarAttachment;
+import org.exoplatform.social.core.model.BannerAttachment;
 
 import java.io.*;
 import java.net.URLDecoder;
@@ -30,7 +31,12 @@ public class InjectorUtils {
     /**
      * User's avatar and Space's icon Location
      */
-    public static final String DATA_INJECTOR_IMAGE_PATH = "/medias/images/";
+    public static final String DATA_INJECTOR_IMAGE_AVATAR_PATH = "/medias/images/avatars/";
+
+    /**
+     * User and space Banner Location
+     */
+    public static final String DATA_INJECTOR_IMAGE_BANNER_PATH = "/medias/images/banners/";
     /**
      * Fake data Location
      */
@@ -51,7 +57,7 @@ public class InjectorUtils {
         try {
             if ((defaultDataPath != null) && (defaultDataPath.length() > 0)) {
 
-                injectorDataFolder =System.getProperty( "catalina.base").concat(File.separator).concat(defaultDataPath);
+                injectorDataFolder = System.getProperty("catalina.base").concat(File.separator).concat(defaultDataPath);
 
             }
 
@@ -77,7 +83,7 @@ public class InjectorUtils {
     public static AvatarAttachment getAvatarAttachment(String fileName, String defaultFolder) throws Exception {
         String mimeType = "image/png";
         int WIDTH = 120;
-        InputStream inputStream = FileUtils.openInputStream(new File(getConfigPath(defaultFolder) + DATA_INJECTOR_IMAGE_PATH + fileName));
+        InputStream inputStream = FileUtils.openInputStream(new File(getConfigPath(defaultFolder) + DATA_INJECTOR_IMAGE_AVATAR_PATH + fileName));
         // Resize avatar to fixed width if can't(avatarAttachment == null) keep
         // origin avatar
         AvatarAttachment avatarAttachment = ImageUtils.createResizedAvatarAttachment(inputStream,
@@ -91,6 +97,24 @@ public class InjectorUtils {
             avatarAttachment = new AvatarAttachment(null, fileName, mimeType, inputStream, null, System.currentTimeMillis());
         }
         return avatarAttachment;
+    }
+
+    /**
+     * Gets the avatar attachment.
+     *
+     * @param fileName      the file name
+     * @param defaultFolder the data folder path
+     * @return the avatar attachment
+     * @throws Exception the exception
+     */
+    public static BannerAttachment getBannerAttachment(String fileName, String defaultFolder) throws Exception {
+        String mimeType = "image/png";
+        int WIDTH = 120;
+        InputStream inputStream = FileUtils.openInputStream(new File(getConfigPath(defaultFolder) + DATA_INJECTOR_IMAGE_BANNER_PATH + fileName));
+
+        BannerAttachment bannerAttachment = new BannerAttachment(null, fileName, mimeType, inputStream, null, System.currentTimeMillis());
+
+        return bannerAttachment;
     }
 
 

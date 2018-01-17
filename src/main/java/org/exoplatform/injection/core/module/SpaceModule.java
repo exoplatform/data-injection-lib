@@ -16,6 +16,7 @@ import org.exoplatform.social.core.identity.model.Identity;
 import org.exoplatform.social.core.identity.provider.SpaceIdentityProvider;
 import org.exoplatform.social.core.manager.IdentityManager;
 import org.exoplatform.social.core.model.AvatarAttachment;
+import org.exoplatform.social.core.model.BannerAttachment;
 import org.exoplatform.social.core.space.SpaceUtils;
 import org.exoplatform.social.core.space.impl.DefaultSpaceApplicationHandler;
 import org.exoplatform.social.core.space.model.Space;
@@ -75,7 +76,7 @@ public class SpaceModule {
 
                         }
                     }
-                    createSpaceAvatar(space.getString("displayName"), space.getString("creator"), space.getString("avatar"), defaultDataFolderPath);
+                    createSpaceAvatar(space.getString("displayName"), space.getString("creator"), space.getString("avatar"),space.getString("banner"), defaultDataFolderPath);
 
                 }
                 //RequestLifeCycle.end();
@@ -96,17 +97,24 @@ public class SpaceModule {
      * @param avatarFile            the avatar file
      * @param defaultDataFolderPath the default data folder path
      */
-    private void createSpaceAvatar(String name, String editor, String avatarFile, String defaultDataFolderPath) {
+    private void createSpaceAvatar(String name, String editor, String avatarFile, String bannerFile, String defaultDataFolderPath) {
         Space space = null;
         try {
             space = spaceService.getSpaceByDisplayName(name);
             if (space != null) {
                 try {
+                    //--- Create space's avatar
                     AvatarAttachment avatarAttachment = InjectorUtils.getAvatarAttachment(avatarFile, defaultDataFolderPath);
                     space.setAvatarAttachment(avatarAttachment);
+
+                    //--- Create space's banner
+                    BannerAttachment bannerAttachment = InjectorUtils.getBannerAttachment(bannerFile, defaultDataFolderPath);
+                    space.setBannerAttachment(bannerAttachment);
+
                     spaceService.updateSpace(space);
                     space.setEditor(editor);
                     spaceService.updateSpaceAvatar(space);
+                    spaceService.updateSpaceBanner(space);
                 } catch (Exception e) {
                     LOG.error("Unable to set avatar for space " + space.getDisplayName(), e);
                 }
