@@ -133,7 +133,7 @@ public class UserModule extends AbstractModule {
         user.setEmail(email);
         user.setFirstName(firstname);
         user.setLastName(lastname);
-        user.setLastName(password);
+        user.setPassword(password);
         //
         // Creates a 32 chars length of string from the defined array of
         // characters including numeric and alphabetic characters.
@@ -142,8 +142,6 @@ public class UserModule extends AbstractModule {
             if (PropertyManager.getProperty(USER_MODULE_RANDOM_PASSWORD_PROPERTY).equalsIgnoreCase(USER_MODULE_ENABLE)) {
                 user.setPassword(RandomStringUtils.random(32, 0, 8, true, true, "eXoTribe".toCharArray()));
             }
-
-
         }
         try {
             organizationService.getUserHandler().createUser(user, true);

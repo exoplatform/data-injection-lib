@@ -1,12 +1,16 @@
 package org.exoplatform.injection.core.module;
 
 
+import org.exoplatform.commons.utils.PropertyManager;
 import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.injection.helper.InjectorUtils;
+import org.exoplatform.injection.services.AbstractModule;
 import org.exoplatform.portal.config.model.PortalConfig;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.social.core.space.model.Space;
+import org.exoplatform.social.core.space.spi.SpaceService;
 import org.exoplatform.wiki.WikiException;
 import org.exoplatform.wiki.mow.api.Page;
 import org.exoplatform.wiki.mow.api.Wiki;
@@ -19,7 +23,7 @@ import org.xwiki.rendering.syntax.Syntax;
 
 import java.io.IOException;
 
-public class WikiModule {
+public class WikiModule extends AbstractModule {
 
     /**
      * The log.
@@ -27,9 +31,11 @@ public class WikiModule {
     private final Log LOG = ExoLogger.getLogger(WikiModule.class);
 
     protected WikiService wikiService;
+    protected SpaceService spaceService;
 
-    public WikiModule(WikiService wikiService) {
+    public WikiModule(WikiService wikiService, SpaceService spaceService) {
         this.wikiService = wikiService;
+        this.spaceService = spaceService;
 
     }
 
@@ -41,11 +47,15 @@ public class WikiModule {
      * @param defaultDataFolderPath the default data folder path
      */
     public void createUserWiki(JSONArray wikis, String defaultDataFolderPath) {
+        String spacePrefix = "";
+        if(PropertyManager.getProperty(SPACE_MODULE_PREFIX_PATTERN_VALUE) != null) {
+            spacePrefix = PropertyManager.getProperty(SPACE_MODULE_PREFIX_PATTERN_VALUE);
+        }
         for (int i = 0; i < wikis.length(); i++) {
             RequestLifeCycle.begin(PortalContainer.getInstance());
             try {
                 JSONObject wiki = wikis.getJSONObject(i);
-                createOrEditPage(wiki, wiki.has("parent") ? wiki.getString("parent") : "", defaultDataFolderPath);
+                createOrEditPage(wiki, wiki.has("parent") ? wiki.getString("parent") : "", defaultDataFolderPath, spacePrefix);
             } catch (JSONException e) {
                 LOG.error("Syntax error on wiki n°" + i, e);
 
@@ -63,20 +73,28 @@ public class WikiModule {
      * @param defaultDataFolderPath the default data folder path
      * @throws JSONException the JSON exception
      */
-    private void createOrEditPage(JSONObject wiki, String parentTitle, String defaultDataFolderPath) throws JSONException {
+    private void createOrEditPage(JSONObject wiki, String parentTitle, String defaultDataFolderPath, String spacePrefix) throws JSONException {
         boolean forceNew = wiki.has("new") && wiki.getBoolean("new");
         String title = wiki.getString("title");
         String filename = wiki.has("filename") ? wiki.getString("filename") : "";
         String parent = parentTitle;
         String type = wiki.has("type") ? wiki.getString("type") : "";
+        Space target = null;
+        String owner = wiki.has("owner") ? wiki.getString("owner") : "";
         if ("group".equals(type)) {
             type = PortalConfig.GROUP_TYPE;
+            // When wiki's type is a group we should compute the owner
+            // Get target space
+            target = spaceService.getSpaceByDisplayName(owner);
+            //--- Needed to convert space displayName to PrettyName
+            owner = target.getGroupId();
+
         } else if ("portal".equals(type)) {
             type = PortalConfig.PORTAL_TYPE;
         } else {
             type = PortalConfig.USER_TYPE;
         }
-        String owner = wiki.has("owner") ? wiki.getString("owner") : "";
+
 
         try {
             // does wiki exists ?
@@ -108,7 +126,7 @@ public class WikiModule {
             if (wiki.has("wikis") && wiki.getJSONArray("wikis").length() > 0) {
                 for (int j = 0; j < wiki.getJSONArray("wikis").length(); j++) {
                     JSONObject childWiki = wiki.getJSONArray("wikis").getJSONObject(j);
-                    createOrEditPage(childWiki, wiki.getString("title"), defaultDataFolderPath);
+                    createOrEditPage(childWiki, wiki.getString("title"), defaultDataFolderPath,spacePrefix);
                 }
             }
 

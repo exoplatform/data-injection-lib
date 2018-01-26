@@ -7,10 +7,10 @@ import org.exoplatform.container.PortalContainer;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.container.xml.InitParams;
 import org.exoplatform.container.xml.ValueParam;
-import org.exoplatform.injection.services.DataInjector;
+import org.exoplatform.injection.core.module.*;
 import org.exoplatform.injection.helper.InjectorMonitor;
 import org.exoplatform.injection.helper.InjectorUtils;
-import org.exoplatform.injection.core.module.*;
+import org.exoplatform.injection.services.DataInjector;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.json.JSONException;
@@ -116,16 +116,21 @@ public class DataInjectorImpl implements DataInjector {
             File scenariosFolder = new File(InjectorUtils.getConfigPath(dataFolderPath) + SCENARIOS_FOLDER);
 
             for (String fileName : scenariosFolder.list()) {
-                InputStream stream = FileUtils.openInputStream(new File(InjectorUtils.getConfigPath(dataFolderPath) + SCENARIOS_FOLDER + "/" + fileName));
 
-                String fileContent = getData(stream);
-                try {
-                    JSONObject json = new JSONObject(fileContent);
-                    String name = json.getString(SCENARIO_NAME_ATTRIBUTE);
-                    scenarios.put(name, json);
-                } catch (JSONException e) {
-                    LOG.error("Syntax error in scenario " + fileName, e);
+                if (fileName.endsWith(".json")) {
+                    InputStream stream = FileUtils.openInputStream(new File(InjectorUtils.getConfigPath(dataFolderPath) + SCENARIOS_FOLDER + "/" + fileName));
+
+                    String fileContent = getData(stream);
+                    try {
+                        JSONObject json = new JSONObject(fileContent);
+                        String name = json.getString(SCENARIO_NAME_ATTRIBUTE);
+                        scenarios.put(name, json);
+                    } catch (JSONException e) {
+                        LOG.error("Syntax error in scenario " + fileName, e);
+                    }
                 }
+
+
             }
         } catch (URISyntaxException use) {
             LOG.error("Unable to read scenario file", use);
@@ -185,7 +190,7 @@ public class DataInjectorImpl implements DataInjector {
                 LOG.info("Create " + scenarioData.getJSONArray("spaces").length() + " spaces.");
                 completion.put("Spaces", 0);
                 injectorMonitor.start("Processing spaces data");
-                spaceModule_.createSpaces(scenarioData.getJSONArray("spaces"), dataFolderPath, "exo test ");
+                spaceModule_.createSpaces(scenarioData.getJSONArray("spaces"), dataFolderPath);
                 completion.put("Spaces", 100);
                 injectorMonitor.stop();
             }
@@ -263,21 +268,19 @@ public class DataInjectorImpl implements DataInjector {
         enforceCloseTransaction();
         LOG.info("Purge {} .............", this.getClass().getName());
         InjectorMonitor injectorMonitor = new InjectorMonitor("Data Injection Purge Process");
-        //--- Start data injection
-        String downloadUrl = "";
         try {
 
             JSONObject scenarioData = scenarios.get(scenarioName).getJSONObject("data");
 
             if (scenarioData.has("spaces")) {
-                LOG.info("Create " + scenarioData.getJSONArray("spaces").length() + " spaces.");
+                LOG.info("Purging " + scenarioData.getJSONArray("spaces").length() + " spaces.");
                 injectorMonitor.start("Purging spaces");
-                spaceModule_.purgeSpaces(scenarioData.getJSONArray("spaces"), "exo test ");
+                spaceModule_.purgeSpaces(scenarioData.getJSONArray("spaces"));
                 injectorMonitor.stop();
             }
             if (scenarioData.has("relations")) {
-                LOG.info("Purge " + scenarioData.getJSONArray("relations").length() + " relations.");
-                injectorMonitor.start("Purging spaces");
+                LOG.info("Purging " + scenarioData.getJSONArray("relations").length() + " relations.");
+                injectorMonitor.start("Purging relations");
                 userModule_.purgeRelations(scenarioData.getJSONArray("relations"));
                 injectorMonitor.stop();
             }

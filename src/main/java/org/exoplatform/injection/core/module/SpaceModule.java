@@ -2,12 +2,11 @@ package org.exoplatform.injection.core.module;
 
 
 import org.apache.commons.lang.StringUtils;
-import org.exoplatform.commons.persistence.impl.EntityManagerService;
-import org.exoplatform.commons.utils.CommonsUtils;
+import org.exoplatform.commons.utils.PropertyManager;
 import org.exoplatform.container.PortalContainer;
-import org.exoplatform.container.component.ComponentRequestLifecycle;
 import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.injection.helper.InjectorUtils;
+import org.exoplatform.injection.services.AbstractModule;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 import org.exoplatform.services.organization.Group;
@@ -25,9 +24,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.persistence.EntityManager;
-
-public class SpaceModule {
+public class SpaceModule extends AbstractModule {
 
     /**
      * The log.
@@ -55,14 +52,19 @@ public class SpaceModule {
      * @param spaces                the spaces
      * @param defaultDataFolderPath the default data folder path
      */
-    public void createSpaces(JSONArray spaces, String defaultDataFolderPath, String spacePrefix) {
+    public void createSpaces(JSONArray spaces, String defaultDataFolderPath) {
+        String spacePrefix = "";
+        if(PropertyManager.getProperty(SPACE_MODULE_PREFIX_PATTERN_VALUE) != null) {
+            spacePrefix = PropertyManager.getProperty(SPACE_MODULE_PREFIX_PATTERN_VALUE);
+        }
         for (int i = 0; i < spaces.length(); i++) {
+
             RequestLifeCycle.begin(PortalContainer.getInstance());
 
             try {
                 JSONObject space = spaces.getJSONObject(i);
                 //RequestLifeCycle.begin(ExoContainerContext.getCurrentContainer());
-                boolean created = createSpace(space.getString("displayName"), space.getString("creator"), spacePrefix);
+                boolean created = createSpace(space.getString("displayName"), space.getString("creator"), space.has("description") ? space.getString("description") : "", spacePrefix);
                 //---Create Avatar/Add members only when a space is created
                 if (created) {
 
@@ -131,7 +133,7 @@ public class SpaceModule {
      * @param name    the name
      * @param creator the creator
      */
-    public boolean createSpace(String name, String creator, String spacePrefix) {
+    public boolean createSpace(String name, String creator, String description, String spacePrefix) {
         Space target = null;
         boolean spaceCreated = true;
         try {
@@ -140,7 +142,7 @@ public class SpaceModule {
             if (target != null) {
                 return false;
             }
-            String groupId = "/spaces/" + SpaceUtils.cleanString(name);
+            String groupId = new StringBuffer("/spaces/").append(spacePrefix).append(SpaceUtils.cleanString(name)).toString();
             forceDeleteGroupOfSpaceIfExists(groupId);
 
             Space space = new Space();
@@ -152,6 +154,7 @@ public class SpaceModule {
             space.setGroupId(groupId);
             space.setRegistration(Space.OPEN);
             space.setVisibility(Space.PRIVATE);
+            space.setDescription(description);
             space.setPriority(Space.INTERMEDIATE_PRIORITY);
 
             Identity identity = identityManager.getOrCreateIdentity(SpaceIdentityProvider.NAME, space.getPrettyName(), true);
@@ -172,7 +175,11 @@ public class SpaceModule {
 
     }
 
-    public void purgeSpaces(JSONArray spaces, String prefixSpace) {
+    public void purgeSpaces(JSONArray spaces) {
+        String prefixSpace = "";
+        if(PropertyManager.getProperty(SPACE_MODULE_PREFIX_PATTERN_VALUE) != null) {
+            prefixSpace = PropertyManager.getProperty(SPACE_MODULE_PREFIX_PATTERN_VALUE);
+        }
         for (int i = 0; i < spaces.length(); i++) {
             try {
                 JSONObject space = spaces.getJSONObject(i);
